@@ -1,0 +1,115 @@
+name: financial-demo
+services:
+  postgres:
+    image: postgres:17.7-alpine
+    environment:
+      POSTGRES_DB: finance
+      POSTGRES_USER: finance
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-local-demo-database}
+    volumes:
+      - database:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U finance -d finance"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+  kafka-storage:
+    image: apache/kafka:3.9.1
+    user: "0:0"
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["chown -R 1000:1000 /tmp/kraft-combined-logs"]
+    volumes:
+      - kafka:/tmp/kraft-combined-logs
+  kafka:
+    image: apache/kafka:3.9.1
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+    volumes:
+      - kafka:/tmp/kraft-combined-logs
+    depends_on:
+      kafka-storage: {condition: service_completed_successfully}
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list >/dev/null"]
+      interval: 5s
+      timeout: 10s
+      retries: 30
+  app:
+    build:
+      context: .
+      target: runtime
+    environment:
+      SPRING_PROFILES_ACTIVE: demo
+      MOCK_CONTROL_KEY: ${MOCK_CONTROL_KEY:-local-demo-source-control-key-2026}
+      DATABASE_URL: jdbc:postgresql://postgres:5432/finance
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-local-demo-database}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      STATEMENT_STORAGE: /data/statements
+      DEMO_OPERATOR_PASSWORD: ${DEMO_OPERATOR_PASSWORD:-operator-demo}
+      DEMO_CUSTOMER_PASSWORD: ${DEMO_CUSTOMER_PASSWORD:-customer-demo}
+      DOWNLOAD_LINK_TTL: ${DOWNLOAD_LINK_TTL:-PT5M}
+      FRAUD_ENABLED: ${FRAUD_ENABLED:-true}
+      STATEMENTS_ENABLED: ${STATEMENTS_ENABLED:-true}
+    ports:
+      - "127.0.0.1:${APP_PORT:-8080}:8080"
+    volumes:
+      - statements:/data/statements
+    depends_on:
+      postgres: {condition: service_healthy}
+      kafka: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/actuator/health/readiness"]
+      interval: 5s
+      timeout: 3s
+      retries: 40
+      start_period: 30s
+  bank-source: &source
+    build:
+      context: .
+      target: source
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      MOCK_CONTROL_KEY: ${MOCK_CONTROL_KEY:-local-demo-source-control-key-2026}
+      SOURCE: CORE_BANK
+      EMIT_INTERVAL_MS: ${EMIT_INTERVAL_MS:-5000}
+    depends_on:
+      app: {condition: service_healthy}
+    restart: on-failure
+  card-source:
+    <<: *source
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      MOCK_CONTROL_KEY: ${MOCK_CONTROL_KEY:-local-demo-source-control-key-2026}
+      SOURCE: CARD_PROCESSOR
+      EMIT_INTERVAL_MS: ${EMIT_INTERVAL_MS:-5000}
+  wallet-source:
+    <<: *source
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      MOCK_CONTROL_KEY: ${MOCK_CONTROL_KEY:-local-demo-source-control-key-2026}
+      SOURCE: WALLET_PROVIDER
+      EMIT_INTERVAL_MS: ${EMIT_INTERVAL_MS:-5000}
+  backend-tests:
+    profiles: [test]
+    build:
+      context: .
+      target: java-test
+    volumes:
+      - maven-cache:/root/.m2
+volumes:
+  database:
+  kafka:
+  statements:
+  maven-cache:

@@ -1,0 +1,14 @@
+{
+  "eventId": "evt-bank-001",
+  "schemaVersion": 1,
+  "source": "CORE_BANK",
+  "sourceAccountRef": "bank-account-1042",
+  "occurredAt": "2026-11-09T06:00:00Z",
+  "payload": {
+    "reference": "bank-001",
+    "description": "November salary",
+    "amount": "25000.00",
+    "currency": "ZAR",
+    "creditDebit": "CREDIT"
+  }
+}

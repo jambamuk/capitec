@@ -1,0 +1,105 @@
+{
+  "status": "PROPOSAL ONLY; no application or Dockerfile implemented yet",
+  "detailedDesign": "research-and-architecture.json is updated for Kafka ingestion; erd/01-transactions.mmd is the core model. Import jobs are removed.",
+  "chosenProjectRecommendation": "Transaction Aggregation API, with fraud and statements as optional extensions; assessment requests one chosen project.",
+  "confirmedPreferences": [
+    "Spring Boot",
+    "Spring Modulith",
+    "Liquibase",
+    "TanStack and shadcn frontend",
+    "Docker Compose for local service management",
+    "Simple core flows before additional features",
+    "Kafka transaction streams replace transaction imports and import jobs"
+  ],
+  "flows": [
+    {
+      "name": "Transactions",
+      "steps": [
+        "Three mock producers publish independent transaction streams",
+        "Application consumes, normalizes, categorizes and persists",
+        "Choose customer/account and view transactions and summaries"
+      ],
+      "states": [
+        "no processed transactions",
+        "loading",
+        "loaded",
+        "consumer catching up",
+        "consumer unavailable"
+      ],
+      "note": "Read-only transaction UI with Refresh/optional polling; no CSV upload, Load sample data action, import jobs or source retry controls."
+    },
+    {
+      "name": "Fraud checks",
+      "steps": [
+        "Consume categorized Kafka events",
+        "Apply fixed versioned rules and persist results",
+        "Retrieve fraud outcomes through API"
+      ],
+      "states": [
+        "pending",
+        "not flagged",
+        "flagged",
+        "processing failed"
+      ],
+      "note": "No case-management or rule-editor UI. Mockup illustrates only the high-value debit rule."
+    },
+    {
+      "name": "Statements",
+      "steps": [
+        "Authorized operator uploads PDF for a customer account",
+        "Authorized user requests five-minute link",
+        "Link holder downloads before expiry"
+      ],
+      "states": [
+        "no documents",
+        "uploading",
+        "available",
+        "link active",
+        "link expired",
+        "upload failed"
+      ],
+      "note": "Customer account selection can be omitted only in the single-account demo. Implement backend ownership checks and private storage."
+    }
+  ],
+  "simplestBaseline": {
+    "app": "One Spring Boot modular application; TanStack/shadcn frontend built and bundled into the application image.",
+    "database": "PostgreSQL; Liquibase root changelog includes module-owned changelogs.",
+    "moduleEvents": "Kafka is required for input. Persist categorized-event publication through Spring Modulith in the same DB transaction, then externalize to Kafka. Optional fraud module consumes the categorized topic with a separate consumer group.",
+    "storage": "Private mounted volume behind a storage interface for the local statement extension.",
+    "composeServices": [
+      "app",
+      "postgres",
+      "kafka",
+      "bank-source",
+      "card-source",
+      "wallet-source"
+    ],
+    "observability": "Actuator, structured logs, consumer lag, duplicates, invalid events and categorized-publication backlog; optional monitoring containers later.",
+    "deferred": [
+      "NiFi",
+      "Flink",
+      "Separate frontend runtime container",
+      "Rule editor",
+      "Fraud case management",
+      "Operational dashboard"
+    ]
+  },
+  "submissionDeliverables": [
+    "Multi-stage runnable Dockerfile",
+    "compose.yaml with healthchecks, persistent volumes and externalized configuration",
+    "README for build/run/test, chosen brief, architecture tradeoffs and limitations",
+    "Automated tests for normalization, categorization, exact money, deduplication, source failures, access control and chosen extensions",
+    "OpenAPI contract and deterministic mock sources",
+    "GitHub repository link"
+  ],
+  "qualityNotes": [
+    "Compose manages the reproducible local setup, not a claim of production HA.",
+    "No confirmed-fraud claim from a rule match.",
+    "Repeated sample loading must not inflate totals.",
+    "Never interpret a missing fraud evaluation as NOT_FLAGGED.",
+    "Do not add dashboards to demonstrate behavior already clear through APIs and tests.",
+    "Mock producers run in the demo Compose profile and never insert directly into PostgreSQL.",
+    "Kafka-to-PostgreSQL delivery is at least once with idempotent writes; no cross-system exactly-once claim.",
+    "Existing transaction mockup and original prompt are historical: stream status/Refresh replaces Load sample data and source labels change."
+  ]
+}

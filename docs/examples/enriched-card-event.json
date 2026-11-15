@@ -1,0 +1,33 @@
+{
+  "eventId": "evt-card-20261110-93821",
+  "schemaVersion": 2,
+  "source": "CARD_PROCESSOR",
+  "sourceAccountRef": "card-account-1042",
+  "occurredAt": "2026-11-10T10:14:28Z",
+  "payload": {
+    "transactionRef": "card-20261110-93821",
+    "merchantName": "Online electronics",
+    "amountMinor": 329995,
+    "currency": "ZAR",
+    "direction": "DEBIT",
+    "payment": {
+      "status": "BOOKED",
+      "type": "CARD_PURCHASE",
+      "channel": "ECOMMERCE",
+      "bookedAt": "2026-11-10T10:14:30Z",
+      "valueDate": "2026-11-10",
+      "paymentReference": "purchase-93821",
+      "merchant": {
+        "id": "merchant-uk-18",
+        "name": "Online electronics",
+        "categoryCode": "5732",
+        "country": "GB"
+      },
+      "counterparty": null,
+      "instrument": {
+        "lastFour": "1042",
+        "authentication": "THREE_DS"
+      }
+    }
+  }
+}

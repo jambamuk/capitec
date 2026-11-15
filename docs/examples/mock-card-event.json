@@ -1,0 +1,14 @@
+{
+  "eventId": "evt-card-001",
+  "schemaVersion": 1,
+  "source": "CARD_PROCESSOR",
+  "sourceAccountRef": "card-account-1042",
+  "occurredAt": "2026-11-09T08:42:40Z",
+  "payload": {
+    "transactionRef": "card-001",
+    "merchantName": "GadgetHub",
+    "amountMinor": 510000,
+    "currency": "ZAR",
+    "direction": "DEBIT"
+  }
+}

@@ -1,0 +1,15 @@
+flowchart LR
+    B["Mock core bank producer"] --> RAW["Kafka source topics"]
+    C["Mock card processor producer"] --> RAW
+    W["Mock wallet producer"] --> RAW
+    RAW --> I["Spring Kafka listeners"]
+    I --> T["Normalize, categorize and deduplicate"]
+    T --> DB[("PostgreSQL transactions")]
+    T --> REG[("Modulith publication registry")]
+    REG --> K["Kafka categorized transactions"]
+    K --> F["Fraud consumer - optional"]
+    F --> FD[("Fraud evaluations")]
+    DB --> API["Spring Boot read API"]
+    FD --> API
+    API --> UI["TanStack UI"]
+    I --> DLT["Dead-letter topic on invalid record"]

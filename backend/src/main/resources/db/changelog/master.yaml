@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/001-schema.sql
+  - include:
+      file: db/changelog/002-demo.sql
+  - include:
+      file: db/changelog/003-configurable-rules.sql
+  - include:
+      file: db/changelog/004-payment-context.sql
+  - include:
+      file: db/changelog/005-review-and-repositories.sql
+  - include:
+      file: db/changelog/006-publication-listener-package.sql
+  - include:
+      file: db/changelog/007-testing-workspace.sql
+  - include:
+      file: db/changelog/008-overview.sql
+  - include:
+      file: db/changelog/009-review-outcomes.sql

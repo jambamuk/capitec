@@ -1,0 +1,11 @@
+# Applied after deterministic assertions to exercise the real continuous sources.
+services:
+  bank-source:
+    environment:
+      EMIT_INTERVAL_MS: "1000"
+  card-source:
+    environment:
+      EMIT_INTERVAL_MS: "1000"
+  wallet-source:
+    environment:
+      EMIT_INTERVAL_MS: "1000"

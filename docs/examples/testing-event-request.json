@@ -1,0 +1,18 @@
+{
+  "requestId": "67e78791-69eb-4ff7-bb50-41520fcf74e3",
+  "accountId": "20000000-0000-0000-0000-000000000001",
+  "source": "CARD_PROCESSOR",
+  "amount": "3000.00",
+  "description": "Overseas electronics purchase",
+  "direction": "DEBIT",
+  "type": "CARD_PURCHASE",
+  "channel": "ECOMMERCE",
+  "occurredAt": "2026-11-10T12:00:00Z",
+  "count": 1,
+  "spacingSeconds": 1,
+  "merchant": "Example Electronics",
+  "merchantCategory": "5732",
+  "country": "GB",
+  "beneficiary": null,
+  "beneficiaryAgeMinutes": 0
+}

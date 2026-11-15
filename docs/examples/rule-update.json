@@ -1,0 +1,8 @@
+{
+  "expectedVersion": 1,
+  "rules": [
+    { "code": "HIGH_VALUE_DEBIT", "name": "High value debit", "type": "AMOUNT_GREATER_THAN", "enabled": true, "direction": "DEBIT", "amount": "7500.00", "matchValue": null },
+    { "code": "RESTRICTED_MERCHANT", "name": "Restricted merchant", "type": "MERCHANT_EQUALS", "enabled": true, "direction": "DEBIT", "amount": null, "matchValue": "Restricted Shop" },
+    { "code": "CATEGORY_REVIEW", "name": "Review uncategorized debits", "type": "CATEGORY_EQUALS", "enabled": false, "direction": "DEBIT", "amount": null, "matchValue": "UNCATEGORIZED" }
+  ]
+}

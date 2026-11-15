@@ -1,0 +1,11 @@
+**/target/
+**/node_modules/
+frontend/dist/
+frontend/.vite/
+test-results/
+playwright-report/
+.env
+*.log
+.idea/
+.DS_Store
+data/

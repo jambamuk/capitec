@@ -1,0 +1,13 @@
+{
+  "eventId": "evt-wallet-001",
+  "schemaVersion": 1,
+  "source": "WALLET_PROVIDER",
+  "sourceAccountRef": "wallet-account-1042",
+  "occurredAt": "2026-11-09T06:15:00Z",
+  "payload": {
+    "reference": "wallet-001",
+    "counterparty": "FreshMart",
+    "signedAmount": "-842.50",
+    "currency": "ZAR"
+  }
+}

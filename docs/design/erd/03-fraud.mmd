@@ -1,0 +1,47 @@
+erDiagram
+    FINANCIAL_TRANSACTION ||--o| FRAUD_EVALUATION : evaluated_under
+    FRAUD_RULESET ||--o| FRAUD_RULE_CONFIGURATION : active_revision
+    FRAUD_EVALUATION ||--o{ RULE_RESULT : contains
+    FRAUD_EVALUATION ||--o| FRAUD_REVIEW : reviewed
+    ACCOUNT ||--o{ FRAUD_EVALUATION : scopes
+
+    FINANCIAL_TRANSACTION {
+        uuid id PK
+    }
+    FRAUD_EVALUATION {
+        uuid id PK
+        uuid transaction_id FK,UK
+        uuid account_id FK
+        varchar ruleset_version "immutable configuration version retained in decision"
+        varchar outcome "FLAGGED or NOT_FLAGGED; missing row means pending"
+        varchar severity "NONE LOW MEDIUM HIGH"
+        timestamptz evidence_as_of "available-history snapshot cutoff"
+        timestamptz completed_at
+    }
+    RULE_RESULT {
+        uuid id PK
+        uuid evaluation_id FK
+        varchar rule_code "unique with evaluation_id"
+        varchar rule_version
+        varchar result "MATCHED NOT_MATCHED NOT_APPLICABLE DISABLED INSUFFICIENT_DATA"
+        jsonb criteria_snapshot
+        jsonb observed_values
+        varchar explanation
+    }
+    FRAUD_RULESET {
+        bigint version PK
+        jsonb rules "validated definitions, immutable revision"
+        varchar created_by
+        timestamptz created_at
+    }
+    FRAUD_RULE_CONFIGURATION {
+        smallint id PK "singleton, always 1"
+        bigint active_version FK
+    }
+    FRAUD_REVIEW {
+        uuid transaction_id PK,FK
+        varchar reviewed_by
+        varchar note
+        timestamptz reviewed_at
+        varchar outcome "REVIEWED, CLEARED or ESCALATED"
+    }

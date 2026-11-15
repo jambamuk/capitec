@@ -1,0 +1,14 @@
+{
+  "date": "2026-11-11",
+  "method": "Built-in image generation tool",
+  "asset": "concept.png",
+  "purpose": "Desktop overview direction before implementation; all mock figures are illustrative",
+  "promptBrief": "1440 desktop South African Capitec-inspired operations dashboard. White sidebar with Overview, Transactions, Fraud checks, Fraud rules, Statements, Testing. Light grey #f7f8fa background, white cards, navy headings, blue pill controls, Nunito Sans. Overview header, auto-refresh status and pause, account filter and Today/7 days/30 days controls. Four metric cards. Transaction trend with Count/Value toggle, fraud status donut, category spending bars, incoming per-minute stacked Bank/Card/Wallet bars. Clear drilldowns and expandable data views. No Kafka, SQL or internal implementation text. Use illustrative data.",
+  "reference": "https://www.capitecbank.co.za/business/transact/online-banking/",
+  "implementationChanges": [
+    "Awaiting check uses a neutral color instead of red",
+    "Donut total is labelled transactions because it includes pending checks",
+    "Chart tables preserve exact monetary values",
+    "All runtime values come from the authenticated account-scoped API"
+  ]
+}

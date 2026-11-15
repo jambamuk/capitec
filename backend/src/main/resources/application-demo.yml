@@ -1,0 +1,7 @@
+spring:
+  liquibase:
+    contexts: demo
+app:
+  demo:
+    operator-password: ${DEMO_OPERATOR_PASSWORD:operator-demo}
+    customer-password: ${DEMO_CUSTOMER_PASSWORD:customer-demo}
