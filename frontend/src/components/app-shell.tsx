@@ -4,7 +4,6 @@ import {
   ShieldCheck,
   SlidersHorizontal,
   FileText,
-  FlaskConical,
 } from 'lucide-react'
 import { createContext, useContext, useEffect, Suspense } from 'react'
 import {
@@ -54,7 +53,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
-import { SidebarGroupLabel, SidebarFooter } from '@/components/ui/sidebar'
+import { SidebarGroupLabel } from '@/components/ui/sidebar'
 
 const Context = createContext<{
   session: Session
@@ -176,12 +175,6 @@ function Navigation({ session }: { session: Session }) {
       icon: FileText,
       show: session.statementsEnabled,
     },
-    {
-      to: '/testing',
-      label: 'Testing',
-      icon: FlaskConical,
-      show: session.operator && session.testingEnabled,
-    },
   ] as const
   return (
     <Sidebar>
@@ -192,7 +185,10 @@ function Navigation({ session }: { session: Session }) {
         </div>
       </SidebarHeader>
       <SidebarContent>
-        {['Workspace', 'Manage'].map((group) => (
+        {(session.operator && session.fraudEnabled
+          ? ['Workspace', 'Manage']
+          : ['Workspace']
+        ).map((group) => (
           <SidebarGroup key={group}>
             <SidebarGroupLabel>{group}</SidebarGroupLabel>
             <SidebarGroupContent>
@@ -201,7 +197,6 @@ function Navigation({ session }: { session: Session }) {
                   .filter(
                     (link) =>
                       link.show &&
-                      link.to !== '/testing' &&
                       (group === 'Manage'
                         ? link.to === '/fraud-rules'
                         : link.to !== '/fraud-rules'),
@@ -233,24 +228,6 @@ function Navigation({ session }: { session: Session }) {
           </SidebarGroup>
         ))}
       </SidebarContent>
-      {session.operator && session.testingEnabled && (
-        <SidebarFooter className="border-t p-4">
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={pathname === '/testing'}>
-                <Link
-                  to="/testing"
-                  search={{}}
-                  onClick={() => setOpenMobile(false)}
-                >
-                  <FlaskConical />
-                  <span>Testing</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarFooter>
-      )}
     </Sidebar>
   )
 }
@@ -265,7 +242,6 @@ export function AppShell() {
       '/fraud': 'Fraud checks',
       '/fraud-rules': 'Fraud rules',
       '/statements': 'Statements',
-      '/testing': 'Testing',
     } as Record<string, string>
   )[pathname]
   const client = useQueryClient()

@@ -5,4 +5,3 @@ frontend/dist
 test-results
 playwright-report
 .env
-docs/design/mockups

@@ -23,7 +23,7 @@ export function OverviewSkeleton() {
         ))}
       </div>
       <div className="grid gap-6 xl:grid-cols-2">
-        {[0, 1, 2, 3].map((key) => (
+        {[0, 1, 2].map((key) => (
           <Card key={key}>
             <CardHeader>
               <Skeleton className="h-5 w-40" />

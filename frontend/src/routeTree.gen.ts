@@ -14,7 +14,6 @@ import { Route as FraudRouteImport } from './routes/fraud'
 import { Route as FraudRulesRouteImport } from './routes/fraud-rules'
 import { Route as OverviewRouteImport } from './routes/overview'
 import { Route as StatementsRouteImport } from './routes/statements'
-import { Route as TestingRouteImport } from './routes/testing'
 import { Route as TransactionsRouteImport } from './routes/transactions'
 
 const IndexRoute = IndexRouteImport.update({
@@ -42,11 +41,6 @@ const StatementsRoute = StatementsRouteImport.update({
   path: '/statements',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TestingRoute = TestingRouteImport.update({
-  id: '/testing',
-  path: '/testing',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const TransactionsRoute = TransactionsRouteImport.update({
   id: '/transactions',
   path: '/transactions',
@@ -59,7 +53,6 @@ export interface FileRoutesByFullPath {
   '/fraud-rules': typeof FraudRulesRoute
   '/overview': typeof OverviewRoute
   '/statements': typeof StatementsRoute
-  '/testing': typeof TestingRoute
   '/transactions': typeof TransactionsRoute
 }
 export interface FileRoutesByTo {
@@ -68,7 +61,6 @@ export interface FileRoutesByTo {
   '/fraud-rules': typeof FraudRulesRoute
   '/overview': typeof OverviewRoute
   '/statements': typeof StatementsRoute
-  '/testing': typeof TestingRoute
   '/transactions': typeof TransactionsRoute
 }
 export interface FileRoutesById {
@@ -78,7 +70,6 @@ export interface FileRoutesById {
   '/fraud-rules': typeof FraudRulesRoute
   '/overview': typeof OverviewRoute
   '/statements': typeof StatementsRoute
-  '/testing': typeof TestingRoute
   '/transactions': typeof TransactionsRoute
 }
 export interface FileRouteTypes {
@@ -89,7 +80,6 @@ export interface FileRouteTypes {
     | '/fraud-rules'
     | '/overview'
     | '/statements'
-    | '/testing'
     | '/transactions'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -98,7 +88,6 @@ export interface FileRouteTypes {
     | '/fraud-rules'
     | '/overview'
     | '/statements'
-    | '/testing'
     | '/transactions'
   id:
     | '__root__'
@@ -107,7 +96,6 @@ export interface FileRouteTypes {
     | '/fraud-rules'
     | '/overview'
     | '/statements'
-    | '/testing'
     | '/transactions'
   fileRoutesById: FileRoutesById
 }
@@ -117,7 +105,6 @@ export interface RootRouteChildren {
   FraudRulesRoute: typeof FraudRulesRoute
   OverviewRoute: typeof OverviewRoute
   StatementsRoute: typeof StatementsRoute
-  TestingRoute: typeof TestingRoute
   TransactionsRoute: typeof TransactionsRoute
 }
 
@@ -158,13 +145,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StatementsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/testing': {
-      id: '/testing'
-      path: '/testing'
-      fullPath: '/testing'
-      preLoaderRoute: typeof TestingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/transactions': {
       id: '/transactions'
       path: '/transactions'
@@ -181,7 +161,6 @@ const rootRouteChildren: RootRouteChildren = {
   FraudRulesRoute: FraudRulesRoute,
   OverviewRoute: OverviewRoute,
   StatementsRoute: StatementsRoute,
-  TestingRoute: TestingRoute,
   TransactionsRoute: TransactionsRoute,
 }
 export const routeTree = rootRouteImport

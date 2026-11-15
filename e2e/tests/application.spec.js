@@ -1432,202 +1432,20 @@ test("testing controls enforce access, pause sources and reset all transaction d
   expect((await summary()).transactionCount).toBe(0);
 });
 
-test("testing workspace sends and replays events, inspects fraud and queries real aggregate APIs", async ({
-  browser,
-}) => {
-  test.setTimeout(90000);
-  const current = await (await operator.get("/api/v1/fraud-rules")).json();
-  const rules = [
-    ...richRules,
-    {
-      code: "AMOUNT",
-      name: "High value",
-      type: "AMOUNT_GREATER_THAN",
-      enabled: true,
-      direction: "DEBIT",
-      amount: "5000.00",
-      severity: "HIGH",
-    },
-  ];
-  expect(
-    (
-      await mutate(operator, "put", "/api/v1/fraud-rules", {
-        data: { expectedVersion: current.version, rules },
-      })
-    ).status(),
-  ).toBe(200);
-  const context = await browser.newContext({
-    storageState: await operator.storageState(),
-  });
-  const page = await context.newPage();
-  const errors = [];
-  page.on("pageerror", (error) => errors.push(error.message));
-  await page.goto("/testing");
-  await expect(
-    page.getByRole("heading", { name: "Testing workspace" }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("link", { name: "Testing", exact: true }),
-  ).toBeVisible();
-  await page.getByLabel("Account", { exact: true }).selectOption(account);
-  await page.getByRole("button", { name: "Send events", exact: true }).click();
-  await expect(page.getByText("1 of 1 events acknowledged")).toBeVisible();
-  await expect(
-    page.getByRole("cell", { name: "FLAGGED", exact: true }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: /^Inspect test transaction/ }).click();
-  await expect
-    .poll(
-      async () =>
-        JSON.parse(
-          await page.getByLabel("Fraud evaluation response").inputValue(),
-        ).status,
-    )
-    .toBe("FLAGGED");
-  const evidence = JSON.parse(
-    await page.getByLabel("Fraud evaluation response").inputValue(),
-  );
-  expect(evidence.rules.find((rule) => rule.ruleCode === "AMOUNT").result).toBe(
-    "MATCHED",
-  );
-  const events = JSON.parse(
-    await page.getByLabel("Published Kafka events").inputValue(),
-  );
-  expect(events[0]).toMatchObject({
-    topic: "mock.card.transactions.v1",
-    event: { schemaVersion: 2 },
-  });
-  const replay = page.waitForResponse(
-    (response) =>
-      response.url().endsWith("/api/v1/testing/events") &&
-      response.request().method() === "POST",
-  );
-  await page.getByRole("button", { name: "Replay last batch" }).click();
-  expect((await replay).status()).toBe(202);
-  await page.screenshot({
-    path: "/artifacts/testing-events.png",
-    fullPage: true,
-    animations: "disabled",
-  });
-  await page.getByRole("tab", { name: "API explorer", exact: true }).click();
-  await page.getByRole("button", { name: "Run query" }).click();
-  await expect
-    .poll(
-      async () =>
-        JSON.parse(await page.locator("#api-response").inputValue())
-          .transactionCount,
-    )
-    .toBe(1);
-  expect(
-    JSON.parse(await page.locator("#api-response").inputValue()).moneyOut,
-  ).toBe("6000.00");
-  await page.getByLabel("Endpoint", { exact: true }).selectOption("breakdowns");
-  await page.getByLabel("Group by").selectOption("SOURCE");
-  await page.getByRole("button", { name: "Run query" }).click();
-  await expect
-    .poll(
-      async () =>
-        JSON.parse(await page.locator("#api-response").inputValue()).items?.[0]
-          ?.name,
-    )
-    .toBe("CARD_PROCESSOR");
-  await page.getByLabel("From", { exact: true }).fill("2026-11-20");
-  await page.getByLabel("To (exclusive)").fill("2026-11-01");
-  await page.getByRole("button", { name: "Run query" }).click();
-  await expect(page.getByText(/^HTTP 400/)).toBeVisible();
-  expect(
-    JSON.parse(await page.locator("#api-response").inputValue()).status,
-  ).toBe(400);
-  await page.getByLabel("From", { exact: true }).fill("");
-  await page.getByLabel("To (exclusive)").fill("");
-  await page.getByRole("button", { name: "Run query" }).click();
-  await expect(page.getByText(/^HTTP 200/)).toBeVisible();
-  await page.screenshot({
-    path: "/artifacts/testing-api.png",
-    fullPage: true,
-    animations: "disabled",
-  });
-
-  await page.getByRole("tab", { name: "Transactions", exact: true }).click();
-  await expect(
-    page.getByRole("button", {
-      name: "View transaction Test purchase",
-      exact: true,
-    }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Pause list" }).click();
-  // Let any already-started request finish before verifying the display is frozen.
-  await page.waitForTimeout(300);
-  const fresh = testRequest({
-    description: "Paused list verification",
-    amount: "12.34",
-  });
-  await publishTest(fresh);
-  await testResults(fresh);
-  await page.waitForTimeout(2300);
-  await expect(
-    page.getByRole("button", {
-      name: "View transaction Paused list verification",
-      exact: true,
-    }),
-  ).toHaveCount(0);
-  await page.getByRole("button", { name: "Resume list" }).click();
-  await expect(
-    page.getByRole("button", {
-      name: "View transaction Paused list verification",
-      exact: true,
-    }),
-  ).toBeVisible();
-
-  await page.getByRole("tab", { name: "API explorer", exact: true }).click();
-  await page
-    .getByLabel("Endpoint", { exact: true })
-    .selectOption("transactions");
-  await page.getByLabel("Page size").fill("1");
-  await page.getByRole("button", { name: "Run query" }).click();
-  await expect(
-    page.getByRole("button", { name: "Next result page" }),
-  ).toBeVisible();
-  const first = JSON.parse(await page.locator("#api-response").inputValue())
-    .items[0].id;
-  await page.getByRole("button", { name: "Next result page" }).click();
-  await expect
-    .poll(
-      async () =>
-        JSON.parse(await page.locator("#api-response").inputValue()).items[0]
-          .id,
-    )
-    .not.toBe(first);
-
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.getByRole("tab", { name: "Events", exact: true }).click();
-  expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth <= innerWidth,
-    ),
-  ).toBe(true);
-  await page.screenshot({
-    path: "/artifacts/testing-mobile.png",
-    fullPage: true,
-    animations: "disabled",
-  });
-  await page
-    .getByRole("button", { name: "Reset all transactions", exact: true })
-    .click();
-  await expect(
-    page.getByRole("button", { name: "Confirm reset", exact: true }),
-  ).toBeDisabled();
-  await page.getByLabel("Type RESET to confirm").fill("RESET");
-  await page
-    .getByRole("button", { name: "Confirm reset", exact: true })
-    .click();
-  await expect(page.getByRole("alertdialog")).toHaveCount(0);
-  await expect(
-    page.getByText("Cleared 2 transactions. Sources are paused."),
-  ).toBeVisible();
-  expect((await summary()).transactionCount).toBe(0);
-  expect(errors).toEqual([]);
-  await context.close();
+test("workspace excludes developer tools and hides server diagnostics", async ({ page }) => {
+  await page.context().addCookies((await operator.storageState()).cookies);
+  await page.goto("/overview");
+  await expect(page.getByRole("heading", { name: "Overview", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Testing", exact: true })).toHaveCount(0);
+  await expect(page.getByLabel("Incoming transactions chart")).toHaveCount(0);
+  await page.route("**/api/v1/overview?*", route => route.fulfill({
+    status: 500, contentType: "application/problem+json",
+    body: JSON.stringify({ detail: "SQL failure at /private/database: secret_password" }),
+  }));
+  await page.getByRole("button", { name: "Refresh", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("Please try again shortly");
+  await expect(page.locator("body")).not.toContainText("secret_password");
+  await expect(page.locator("body")).not.toContainText("/private/database");
 });
 
 test("testing event batches retain exact amounts across sources and exercise contextual and velocity rules", async () => {
@@ -1799,7 +1617,7 @@ test("overview charts have exact data views, scoped drilldowns, recoverable live
   ).toBeVisible();
   await page.unroute("**/api/v1/overview?*");
   await expect(page.getByLabel("Transaction activity chart")).toBeVisible();
-  await expect(page.getByLabel("Incoming transactions chart")).toBeVisible();
+  await expect(page.getByLabel("Incoming transactions chart")).toHaveCount(0);
   await expect(page.getByLabel("Fraud review status chart")).toBeVisible();
   await page.getByRole("radio", { name: "Value", exact: true }).click();
   await expect(page.getByText("Rand value by day · SAST")).toBeVisible();

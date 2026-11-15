@@ -11,7 +11,6 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { money } from '@/lib/api'
 import { overviewOptions } from './queries'
 import { ActivityChart } from './activity-chart'
-import { ArrivalChart } from './arrival-chart'
 import { SpendingChart } from './spending-chart'
 import { FraudChart } from './fraud-chart'
 
@@ -126,7 +125,6 @@ export function Overview() {
         />
         <FraudChart report={report} filters={filters} />
         <SpendingChart report={report} filters={filters} />
-        <ArrivalChart report={report} />
       </div>
     </main>
   )

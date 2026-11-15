@@ -49,7 +49,6 @@ export type Summary = {
   lastProcessedAt: string | null
 }
 export type Session = {
-  testingEnabled: boolean
   username: string
   operator: boolean
   fraudEnabled: boolean

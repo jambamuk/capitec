@@ -33,7 +33,6 @@ class SecurityConfiguration {
                         "/assets/**",
                         "/favicon.ico",
                         "/capitec-logo.svg",
-                        "/testing",
                         "/transactions",
                         "/overview",
                         "/fraud",

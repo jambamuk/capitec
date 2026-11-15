@@ -20,8 +20,8 @@ try {
     from financial_transaction t join source_account s on s.id=t.source_account_id
     group by s.source_code order by s.source_code`)
     ).rows;
+  await expect.poll(counts, { timeout: 30000 }).toHaveLength(3);
   const before = await counts();
-  expect(before).toHaveLength(3);
   const context = await browser.newContext({
     storageState: await api.storageState(),
   });
@@ -105,16 +105,16 @@ try {
   }
   await page
     .getByRole("button", {
-      name: "View incoming transactions data",
+      name: "View transaction activity data",
       exact: true,
     })
     .click();
   await expect(
-    page.getByRole("columnheader", { name: "Wallet", exact: true }),
+    page.getByRole("columnheader", { name: "Credits", exact: true }),
   ).toBeVisible();
   await page
     .getByRole("button", {
-      name: "View incoming transactions data",
+      name: "View transaction activity data",
       exact: true,
     })
     .click();

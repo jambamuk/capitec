@@ -2,7 +2,6 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
   activitySeries,
-  arrivalSeries,
 } from '../src/features/overview/chart-data.ts'
 
 function report(patch = {}) {
@@ -55,24 +54,4 @@ test('the exclusive end never introduces an extra day', () => {
     report({ bucket: 'day', asOf: '2026-11-11T22:00:00Z' }),
   )
   assert.equal(rows.length, 1)
-})
-
-test('arrivals include all three sources and quiet minutes across midnight', () => {
-  const data = report({
-    transactions: {
-      activity: [],
-      arrivals: [
-        { at: '2026-11-10T22:00:00Z', source: 'CORE_BANK', count: 2 },
-        { at: '2026-11-10T22:00:00Z', source: 'CARD_PROCESSOR', count: 3 },
-        { at: '2026-11-10T22:10:00Z', source: 'WALLET_PROVIDER', count: 1 },
-      ],
-    },
-  })
-  const rows = arrivalSeries(data)
-  assert.equal(rows.length, 15)
-  assert.equal(rows[0].label, '23:56')
-  assert.equal(rows[0].BANK, 0)
-  assert.equal(rows[4].BANK, 2)
-  assert.equal(rows[4].CARD, 3)
-  assert.equal(rows.at(-1).WALLET, 1)
 })

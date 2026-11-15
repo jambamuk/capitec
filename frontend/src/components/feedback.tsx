@@ -6,12 +6,13 @@ import {
   EmptyDescription,
 } from '@/components/ui/empty'
 import { Skeleton } from '@/components/ui/skeleton'
+import { userErrorMessage } from '@/lib/user-error'
 
 export function ErrorMessage({ error }: { error: Error | null }) {
   return error ? (
     <Alert variant="destructive" role="alert">
       <AlertTitle>Something needs attention</AlertTitle>
-      <AlertDescription>{error.message}</AlertDescription>
+      <AlertDescription>{userErrorMessage(error)}</AlertDescription>
     </Alert>
   ) : null
 }

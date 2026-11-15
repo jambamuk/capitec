@@ -1,7 +1,6 @@
 import type { OverviewReport } from './queries'
 
 const hour = 60 * 60 * 1000
-const minute = 60 * 1000
 const time = new Intl.DateTimeFormat('en-ZA', {
   timeZone: 'Africa/Johannesburg',
   hour: '2-digit',
@@ -48,28 +47,6 @@ export function activitySeries(report: OverviewReport) {
       // Numbers are only used for chart geometry; labels and tables retain exact decimal strings.
       creditValue: Number(values.moneyIn),
       debitValue: Number(values.moneyOut),
-    })
-  }
-  return rows
-}
-
-export function arrivalSeries(report: OverviewReport) {
-  const rows = []
-  for (
-    let at = Date.parse(report.receivedFrom);
-    at <= Date.parse(report.asOf);
-    at += minute
-  ) {
-    const arrivals = report.transactions.arrivals.filter(
-      (row) => Date.parse(row.at) === at,
-    )
-    rows.push({
-      at: new Date(at).toISOString(),
-      label: time.format(at),
-      BANK: arrivals.find((row) => row.source === 'CORE_BANK')?.count ?? 0,
-      CARD: arrivals.find((row) => row.source === 'CARD_PROCESSOR')?.count ?? 0,
-      WALLET:
-        arrivals.find((row) => row.source === 'WALLET_PROVIDER')?.count ?? 0,
     })
   }
   return rows

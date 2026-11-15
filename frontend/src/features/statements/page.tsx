@@ -1,3 +1,4 @@
+import { UserInputError } from '@/lib/user-error'
 import { useEffect, useRef, useState } from 'react'
 import { LinkManager } from './link-manager'
 import { useSearch, useNavigate } from '@tanstack/react-router'
@@ -64,11 +65,11 @@ function StatementsContent() {
   const upload = useMutation({
     mutationFn: async () => {
       const file = input.current?.files?.[0]
-      if (!file) throw new Error('Choose a PDF first.')
+      if (!file) throw new UserInputError('Choose a PDF first.')
       if (!uploadAccountId)
-        throw new Error('Choose the account for this statement.')
+        throw new UserInputError('Choose the account for this statement.')
       if (file.size > 10 * 1024 * 1024)
-        throw new Error('PDF must be no larger than 10 MB.')
+        throw new UserInputError('PDF must be no larger than 10 MB.')
       const body = new FormData()
       body.set('file', file)
       body.set('accountId', uploadAccountId)
@@ -192,7 +193,7 @@ function StatementsContent() {
           description={
             session.operator
               ? 'Upload a PDF for this account to get started.'
-              : 'Statements will appear when an operator uploads them.'
+              : 'Your statements will appear here when they are available.'
           }
         />
       ) : (
@@ -319,7 +320,7 @@ function StatementsContent() {
                         setCopyError(null)
                       } catch {
                         setCopyError(
-                          new Error(
+                          new UserInputError(
                             'Copy is unavailable. Select and copy the link manually.',
                           ),
                         )
